@@ -72,6 +72,14 @@ func (c *FakeCoreV1beta1) Shoots(namespace string) v1beta1.ShootInterface {
 	return &FakeShoots{c, namespace}
 }
 
+func (c *FakeCoreV1beta1) ShootEvents(namespace string) v1beta1.ShootEventInterface {
+	return &FakeShootEvents{c, namespace}
+}
+
+func (c *FakeCoreV1beta1) ShootStates(namespace string) v1beta1.ShootStateInterface {
+	return &FakeShootStates{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeCoreV1beta1) RESTClient() rest.Interface {

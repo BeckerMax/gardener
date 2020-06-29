@@ -69,6 +69,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ShootStateList{},
 		&Shoot{},
 		&ShootList{},
+		&ShootEvent{},
+		&ShootEventList{},
 	)
 	return nil
 }

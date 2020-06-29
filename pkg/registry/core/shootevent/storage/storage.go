@@ -15,7 +15,7 @@
 package storage
 
 import (
-	"github.com/gardener/gardener/pkg/registry/core/shootstate"
+	"github.com/gardener/gardener/pkg/registry/core/shootevent"
 
 	"github.com/gardener/gardener/pkg/apis/core"
 
@@ -25,36 +25,43 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 )
 
-// REST implements a RESTStorage for ShootStates against etcd.
+// REST implements a RESTStorage for shootEvents against etcd.
 type REST struct {
 	*genericregistry.Store
 }
 
-// ShootState implements the storage for ShootStates
-type ShootState struct {
-	ShootState *REST
+// ShootEvent implements the storage for ShootEvents
+// TODO Polish comments for public stuff
+type ShootEvent struct {
+	ShootEvent *REST
 }
 
-// NewStorage creates a new ShootState object.
-func NewStorage(optsGetter generic.RESTOptionsGetter) ShootState {
-	ShootStateRest := NewREST(optsGetter)
+// NewStorage creates a new ShootEvent object.
+func NewStorage(optsGetter generic.RESTOptionsGetter, cloudProfiles rest.StandardStorage) ShootEvent {
+	// TODO Can I do this inline?
+	shootEventRest := NewREST(optsGetter, cloudProfiles)
 
-	return ShootState{
-		ShootState: ShootStateRest,
+	// TODO why all these indirections
+	return ShootEvent{
+		ShootEvent: shootEventRest,
 	}
 }
 
-// NewREST returns a RESTStorage object that will work against ShootStates.
-func NewREST(optsGetter generic.RESTOptionsGetter) *REST {
+// NewREST returns a RESTStorage object that will work with Shootevent objects.
+func NewREST(optsGetter generic.RESTOptionsGetter, cloudProfiles rest.StandardStorage) *REST {
+	// TODO implement NewStrategy. Function could be put in shootevent package
+	strategy := shootevent.NewStrategy(cloudProfiles)
+	// statusStrategy := seed.NewStatusStrategy(cloudProfiles)
+
 	store := &genericregistry.Store{
-		NewFunc:                  func() runtime.Object { return &core.ShootState{} },
-		NewListFunc:              func() runtime.Object { return &core.ShootStateList{} },
-		DefaultQualifiedResource: core.Resource("shootstates"),
+		NewFunc:                  func() runtime.Object { return &core.ShootEvent{} },
+		NewListFunc:              func() runtime.Object { return &core.ShootEventList{} },
+		DefaultQualifiedResource: core.Resource("shootevents"),
 		EnableGarbageCollection:  true,
 
-		CreateStrategy: shootstate.Strategy,
-		UpdateStrategy: shootstate.Strategy,
-		DeleteStrategy: shootstate.Strategy,
+		CreateStrategy: strategy,
+		UpdateStrategy: strategy,
+		DeleteStrategy: strategy,
 
 		TableConvertor: newTableConvertor(),
 	}
@@ -64,12 +71,4 @@ func NewREST(optsGetter generic.RESTOptionsGetter) *REST {
 	}
 
 	return &REST{store}
-}
-
-// Implement CategoriesProvider
-var _ rest.CategoriesProvider = &REST{}
-
-// Categories implements the CategoriesProvider interface. Returns a list of categories a resource is part of.
-func (r *REST) Categories() []string {
-	return []string{"all"}
 }

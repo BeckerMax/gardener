@@ -451,6 +451,16 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
+	if err := s.AddGeneratedConversionFunc((*ExtensionResourceState)(nil), (*core.ExtensionResourceState)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_ExtensionResourceState_To_core_ExtensionResourceState(a.(*ExtensionResourceState), b.(*core.ExtensionResourceState), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.ExtensionResourceState)(nil), (*ExtensionResourceState)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_ExtensionResourceState_To_v1beta1_ExtensionResourceState(a.(*core.ExtensionResourceState), b.(*ExtensionResourceState), scope)
+	}); err != nil {
+		return err
+	}
 	if err := s.AddGeneratedConversionFunc((*Gardener)(nil), (*core.Gardener)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1beta1_Gardener_To_core_Gardener(a.(*Gardener), b.(*core.Gardener), scope)
 	}); err != nil {
@@ -458,6 +468,16 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}
 	if err := s.AddGeneratedConversionFunc((*core.Gardener)(nil), (*Gardener)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_core_Gardener_To_v1beta1_Gardener(a.(*core.Gardener), b.(*Gardener), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*GardenerResourceData)(nil), (*core.GardenerResourceData)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_GardenerResourceData_To_core_GardenerResourceData(a.(*GardenerResourceData), b.(*core.GardenerResourceData), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.GardenerResourceData)(nil), (*GardenerResourceData)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_GardenerResourceData_To_v1beta1_GardenerResourceData(a.(*core.GardenerResourceData), b.(*GardenerResourceData), scope)
 	}); err != nil {
 		return err
 	}
@@ -901,6 +921,16 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
+	if err := s.AddGeneratedConversionFunc((*ResourceData)(nil), (*core.ResourceData)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_ResourceData_To_core_ResourceData(a.(*ResourceData), b.(*core.ResourceData), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.ResourceData)(nil), (*ResourceData)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_ResourceData_To_v1beta1_ResourceData(a.(*core.ResourceData), b.(*ResourceData), scope)
+	}); err != nil {
+		return err
+	}
 	if err := s.AddGeneratedConversionFunc((*SecretBinding)(nil), (*core.SecretBinding)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1beta1_SecretBinding_To_core_SecretBinding(a.(*SecretBinding), b.(*core.SecretBinding), scope)
 	}); err != nil {
@@ -1101,6 +1131,26 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
+	if err := s.AddGeneratedConversionFunc((*ShootEvent)(nil), (*core.ShootEvent)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_ShootEvent_To_core_ShootEvent(a.(*ShootEvent), b.(*core.ShootEvent), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.ShootEvent)(nil), (*ShootEvent)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_ShootEvent_To_v1beta1_ShootEvent(a.(*core.ShootEvent), b.(*ShootEvent), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ShootEventList)(nil), (*core.ShootEventList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_ShootEventList_To_core_ShootEventList(a.(*ShootEventList), b.(*core.ShootEventList), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.ShootEventList)(nil), (*ShootEventList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_ShootEventList_To_v1beta1_ShootEventList(a.(*core.ShootEventList), b.(*ShootEventList), scope)
+	}); err != nil {
+		return err
+	}
 	if err := s.AddGeneratedConversionFunc((*ShootList)(nil), (*core.ShootList)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1beta1_ShootList_To_core_ShootList(a.(*ShootList), b.(*core.ShootList), scope)
 	}); err != nil {
@@ -1138,6 +1188,36 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}
 	if err := s.AddGeneratedConversionFunc((*core.ShootSpec)(nil), (*ShootSpec)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_core_ShootSpec_To_v1beta1_ShootSpec(a.(*core.ShootSpec), b.(*ShootSpec), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ShootState)(nil), (*core.ShootState)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_ShootState_To_core_ShootState(a.(*ShootState), b.(*core.ShootState), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.ShootState)(nil), (*ShootState)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_ShootState_To_v1beta1_ShootState(a.(*core.ShootState), b.(*ShootState), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ShootStateList)(nil), (*core.ShootStateList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_ShootStateList_To_core_ShootStateList(a.(*ShootStateList), b.(*core.ShootStateList), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.ShootStateList)(nil), (*ShootStateList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_ShootStateList_To_v1beta1_ShootStateList(a.(*core.ShootStateList), b.(*ShootStateList), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ShootStateSpec)(nil), (*core.ShootStateSpec)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_ShootStateSpec_To_core_ShootStateSpec(a.(*ShootStateSpec), b.(*core.ShootStateSpec), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*core.ShootStateSpec)(nil), (*ShootStateSpec)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_core_ShootStateSpec_To_v1beta1_ShootStateSpec(a.(*core.ShootStateSpec), b.(*ShootStateSpec), scope)
 	}); err != nil {
 		return err
 	}
@@ -2254,6 +2334,34 @@ func Convert_core_Extension_To_v1beta1_Extension(in *core.Extension, out *Extens
 	return autoConvert_core_Extension_To_v1beta1_Extension(in, out, s)
 }
 
+func autoConvert_v1beta1_ExtensionResourceState_To_core_ExtensionResourceState(in *ExtensionResourceState, out *core.ExtensionResourceState, s conversion.Scope) error {
+	out.Kind = in.Kind
+	out.Name = (*string)(unsafe.Pointer(in.Name))
+	out.Purpose = (*string)(unsafe.Pointer(in.Purpose))
+	out.State = (*runtime.RawExtension)(unsafe.Pointer(in.State))
+	out.Resources = *(*[]core.NamedResourceReference)(unsafe.Pointer(&in.Resources))
+	return nil
+}
+
+// Convert_v1beta1_ExtensionResourceState_To_core_ExtensionResourceState is an autogenerated conversion function.
+func Convert_v1beta1_ExtensionResourceState_To_core_ExtensionResourceState(in *ExtensionResourceState, out *core.ExtensionResourceState, s conversion.Scope) error {
+	return autoConvert_v1beta1_ExtensionResourceState_To_core_ExtensionResourceState(in, out, s)
+}
+
+func autoConvert_core_ExtensionResourceState_To_v1beta1_ExtensionResourceState(in *core.ExtensionResourceState, out *ExtensionResourceState, s conversion.Scope) error {
+	out.Kind = in.Kind
+	out.Name = (*string)(unsafe.Pointer(in.Name))
+	out.Purpose = (*string)(unsafe.Pointer(in.Purpose))
+	out.State = (*runtime.RawExtension)(unsafe.Pointer(in.State))
+	out.Resources = *(*[]NamedResourceReference)(unsafe.Pointer(&in.Resources))
+	return nil
+}
+
+// Convert_core_ExtensionResourceState_To_v1beta1_ExtensionResourceState is an autogenerated conversion function.
+func Convert_core_ExtensionResourceState_To_v1beta1_ExtensionResourceState(in *core.ExtensionResourceState, out *ExtensionResourceState, s conversion.Scope) error {
+	return autoConvert_core_ExtensionResourceState_To_v1beta1_ExtensionResourceState(in, out, s)
+}
+
 func autoConvert_v1beta1_Gardener_To_core_Gardener(in *Gardener, out *core.Gardener, s conversion.Scope) error {
 	out.ID = in.ID
 	out.Name = in.Name
@@ -2276,6 +2384,30 @@ func autoConvert_core_Gardener_To_v1beta1_Gardener(in *core.Gardener, out *Garde
 // Convert_core_Gardener_To_v1beta1_Gardener is an autogenerated conversion function.
 func Convert_core_Gardener_To_v1beta1_Gardener(in *core.Gardener, out *Gardener, s conversion.Scope) error {
 	return autoConvert_core_Gardener_To_v1beta1_Gardener(in, out, s)
+}
+
+func autoConvert_v1beta1_GardenerResourceData_To_core_GardenerResourceData(in *GardenerResourceData, out *core.GardenerResourceData, s conversion.Scope) error {
+	out.Name = in.Name
+	out.Type = in.Type
+	out.Data = in.Data
+	return nil
+}
+
+// Convert_v1beta1_GardenerResourceData_To_core_GardenerResourceData is an autogenerated conversion function.
+func Convert_v1beta1_GardenerResourceData_To_core_GardenerResourceData(in *GardenerResourceData, out *core.GardenerResourceData, s conversion.Scope) error {
+	return autoConvert_v1beta1_GardenerResourceData_To_core_GardenerResourceData(in, out, s)
+}
+
+func autoConvert_core_GardenerResourceData_To_v1beta1_GardenerResourceData(in *core.GardenerResourceData, out *GardenerResourceData, s conversion.Scope) error {
+	out.Name = in.Name
+	out.Type = in.Type
+	out.Data = in.Data
+	return nil
+}
+
+// Convert_core_GardenerResourceData_To_v1beta1_GardenerResourceData is an autogenerated conversion function.
+func Convert_core_GardenerResourceData_To_v1beta1_GardenerResourceData(in *core.GardenerResourceData, out *GardenerResourceData, s conversion.Scope) error {
+	return autoConvert_core_GardenerResourceData_To_v1beta1_GardenerResourceData(in, out, s)
 }
 
 func autoConvert_v1beta1_Hibernation_To_core_Hibernation(in *Hibernation, out *core.Hibernation, s conversion.Scope) error {
@@ -3537,6 +3669,28 @@ func Convert_core_Region_To_v1beta1_Region(in *core.Region, out *Region, s conve
 	return autoConvert_core_Region_To_v1beta1_Region(in, out, s)
 }
 
+func autoConvert_v1beta1_ResourceData_To_core_ResourceData(in *ResourceData, out *core.ResourceData, s conversion.Scope) error {
+	out.CrossVersionObjectReference = in.CrossVersionObjectReference
+	out.Data = in.Data
+	return nil
+}
+
+// Convert_v1beta1_ResourceData_To_core_ResourceData is an autogenerated conversion function.
+func Convert_v1beta1_ResourceData_To_core_ResourceData(in *ResourceData, out *core.ResourceData, s conversion.Scope) error {
+	return autoConvert_v1beta1_ResourceData_To_core_ResourceData(in, out, s)
+}
+
+func autoConvert_core_ResourceData_To_v1beta1_ResourceData(in *core.ResourceData, out *ResourceData, s conversion.Scope) error {
+	out.CrossVersionObjectReference = in.CrossVersionObjectReference
+	out.Data = in.Data
+	return nil
+}
+
+// Convert_core_ResourceData_To_v1beta1_ResourceData is an autogenerated conversion function.
+func Convert_core_ResourceData_To_v1beta1_ResourceData(in *core.ResourceData, out *ResourceData, s conversion.Scope) error {
+	return autoConvert_core_ResourceData_To_v1beta1_ResourceData(in, out, s)
+}
+
 func autoConvert_v1beta1_SecretBinding_To_core_SecretBinding(in *SecretBinding, out *core.SecretBinding, s conversion.Scope) error {
 	out.ObjectMeta = in.ObjectMeta
 	out.SecretRef = in.SecretRef
@@ -4053,6 +4207,56 @@ func Convert_core_Shoot_To_v1beta1_Shoot(in *core.Shoot, out *Shoot, s conversio
 	return autoConvert_core_Shoot_To_v1beta1_Shoot(in, out, s)
 }
 
+func autoConvert_v1beta1_ShootEvent_To_core_ShootEvent(in *ShootEvent, out *core.ShootEvent, s conversion.Scope) error {
+	out.ObjectMeta = in.ObjectMeta
+	out.EventTime = in.EventTime
+	out.Action = in.Action
+	out.Reason = in.Reason
+	out.Type = in.Type
+	return nil
+}
+
+// Convert_v1beta1_ShootEvent_To_core_ShootEvent is an autogenerated conversion function.
+func Convert_v1beta1_ShootEvent_To_core_ShootEvent(in *ShootEvent, out *core.ShootEvent, s conversion.Scope) error {
+	return autoConvert_v1beta1_ShootEvent_To_core_ShootEvent(in, out, s)
+}
+
+func autoConvert_core_ShootEvent_To_v1beta1_ShootEvent(in *core.ShootEvent, out *ShootEvent, s conversion.Scope) error {
+	out.ObjectMeta = in.ObjectMeta
+	out.EventTime = in.EventTime
+	out.Action = in.Action
+	out.Reason = in.Reason
+	out.Type = in.Type
+	return nil
+}
+
+// Convert_core_ShootEvent_To_v1beta1_ShootEvent is an autogenerated conversion function.
+func Convert_core_ShootEvent_To_v1beta1_ShootEvent(in *core.ShootEvent, out *ShootEvent, s conversion.Scope) error {
+	return autoConvert_core_ShootEvent_To_v1beta1_ShootEvent(in, out, s)
+}
+
+func autoConvert_v1beta1_ShootEventList_To_core_ShootEventList(in *ShootEventList, out *core.ShootEventList, s conversion.Scope) error {
+	out.ListMeta = in.ListMeta
+	out.Items = *(*[]core.ShootEvent)(unsafe.Pointer(&in.Items))
+	return nil
+}
+
+// Convert_v1beta1_ShootEventList_To_core_ShootEventList is an autogenerated conversion function.
+func Convert_v1beta1_ShootEventList_To_core_ShootEventList(in *ShootEventList, out *core.ShootEventList, s conversion.Scope) error {
+	return autoConvert_v1beta1_ShootEventList_To_core_ShootEventList(in, out, s)
+}
+
+func autoConvert_core_ShootEventList_To_v1beta1_ShootEventList(in *core.ShootEventList, out *ShootEventList, s conversion.Scope) error {
+	out.ListMeta = in.ListMeta
+	out.Items = *(*[]ShootEvent)(unsafe.Pointer(&in.Items))
+	return nil
+}
+
+// Convert_core_ShootEventList_To_v1beta1_ShootEventList is an autogenerated conversion function.
+func Convert_core_ShootEventList_To_v1beta1_ShootEventList(in *core.ShootEventList, out *ShootEventList, s conversion.Scope) error {
+	return autoConvert_core_ShootEventList_To_v1beta1_ShootEventList(in, out, s)
+}
+
 func autoConvert_v1beta1_ShootList_To_core_ShootList(in *ShootList, out *core.ShootList, s conversion.Scope) error {
 	out.ListMeta = in.ListMeta
 	if in.Items != nil {
@@ -4207,6 +4411,78 @@ func autoConvert_core_ShootSpec_To_v1beta1_ShootSpec(in *core.ShootSpec, out *Sh
 // Convert_core_ShootSpec_To_v1beta1_ShootSpec is an autogenerated conversion function.
 func Convert_core_ShootSpec_To_v1beta1_ShootSpec(in *core.ShootSpec, out *ShootSpec, s conversion.Scope) error {
 	return autoConvert_core_ShootSpec_To_v1beta1_ShootSpec(in, out, s)
+}
+
+func autoConvert_v1beta1_ShootState_To_core_ShootState(in *ShootState, out *core.ShootState, s conversion.Scope) error {
+	out.ObjectMeta = in.ObjectMeta
+	if err := Convert_v1beta1_ShootStateSpec_To_core_ShootStateSpec(&in.Spec, &out.Spec, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Convert_v1beta1_ShootState_To_core_ShootState is an autogenerated conversion function.
+func Convert_v1beta1_ShootState_To_core_ShootState(in *ShootState, out *core.ShootState, s conversion.Scope) error {
+	return autoConvert_v1beta1_ShootState_To_core_ShootState(in, out, s)
+}
+
+func autoConvert_core_ShootState_To_v1beta1_ShootState(in *core.ShootState, out *ShootState, s conversion.Scope) error {
+	out.ObjectMeta = in.ObjectMeta
+	if err := Convert_core_ShootStateSpec_To_v1beta1_ShootStateSpec(&in.Spec, &out.Spec, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Convert_core_ShootState_To_v1beta1_ShootState is an autogenerated conversion function.
+func Convert_core_ShootState_To_v1beta1_ShootState(in *core.ShootState, out *ShootState, s conversion.Scope) error {
+	return autoConvert_core_ShootState_To_v1beta1_ShootState(in, out, s)
+}
+
+func autoConvert_v1beta1_ShootStateList_To_core_ShootStateList(in *ShootStateList, out *core.ShootStateList, s conversion.Scope) error {
+	out.ListMeta = in.ListMeta
+	out.Items = *(*[]core.ShootState)(unsafe.Pointer(&in.Items))
+	return nil
+}
+
+// Convert_v1beta1_ShootStateList_To_core_ShootStateList is an autogenerated conversion function.
+func Convert_v1beta1_ShootStateList_To_core_ShootStateList(in *ShootStateList, out *core.ShootStateList, s conversion.Scope) error {
+	return autoConvert_v1beta1_ShootStateList_To_core_ShootStateList(in, out, s)
+}
+
+func autoConvert_core_ShootStateList_To_v1beta1_ShootStateList(in *core.ShootStateList, out *ShootStateList, s conversion.Scope) error {
+	out.ListMeta = in.ListMeta
+	out.Items = *(*[]ShootState)(unsafe.Pointer(&in.Items))
+	return nil
+}
+
+// Convert_core_ShootStateList_To_v1beta1_ShootStateList is an autogenerated conversion function.
+func Convert_core_ShootStateList_To_v1beta1_ShootStateList(in *core.ShootStateList, out *ShootStateList, s conversion.Scope) error {
+	return autoConvert_core_ShootStateList_To_v1beta1_ShootStateList(in, out, s)
+}
+
+func autoConvert_v1beta1_ShootStateSpec_To_core_ShootStateSpec(in *ShootStateSpec, out *core.ShootStateSpec, s conversion.Scope) error {
+	out.Gardener = *(*[]core.GardenerResourceData)(unsafe.Pointer(&in.Gardener))
+	out.Extensions = *(*[]core.ExtensionResourceState)(unsafe.Pointer(&in.Extensions))
+	out.Resources = *(*[]core.ResourceData)(unsafe.Pointer(&in.Resources))
+	return nil
+}
+
+// Convert_v1beta1_ShootStateSpec_To_core_ShootStateSpec is an autogenerated conversion function.
+func Convert_v1beta1_ShootStateSpec_To_core_ShootStateSpec(in *ShootStateSpec, out *core.ShootStateSpec, s conversion.Scope) error {
+	return autoConvert_v1beta1_ShootStateSpec_To_core_ShootStateSpec(in, out, s)
+}
+
+func autoConvert_core_ShootStateSpec_To_v1beta1_ShootStateSpec(in *core.ShootStateSpec, out *ShootStateSpec, s conversion.Scope) error {
+	out.Gardener = *(*[]GardenerResourceData)(unsafe.Pointer(&in.Gardener))
+	out.Extensions = *(*[]ExtensionResourceState)(unsafe.Pointer(&in.Extensions))
+	out.Resources = *(*[]ResourceData)(unsafe.Pointer(&in.Resources))
+	return nil
+}
+
+// Convert_core_ShootStateSpec_To_v1beta1_ShootStateSpec is an autogenerated conversion function.
+func Convert_core_ShootStateSpec_To_v1beta1_ShootStateSpec(in *core.ShootStateSpec, out *ShootStateSpec, s conversion.Scope) error {
+	return autoConvert_core_ShootStateSpec_To_v1beta1_ShootStateSpec(in, out, s)
 }
 
 func autoConvert_v1beta1_ShootStatus_To_core_ShootStatus(in *ShootStatus, out *core.ShootStatus, s conversion.Scope) error {

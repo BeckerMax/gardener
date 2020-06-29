@@ -31,6 +31,7 @@ import (
 	seedstore "github.com/gardener/gardener/pkg/registry/core/seed/storage"
 	shootstore "github.com/gardener/gardener/pkg/registry/core/shoot/storage"
 	shootstatestore "github.com/gardener/gardener/pkg/registry/core/shootstate/storage"
+	shooteventstore "github.com/gardener/gardener/pkg/registry/core/shootevent/storage"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/registry/generic"
@@ -99,6 +100,10 @@ func (p StorageProvider) v1alpha1Storage(restOptionsGetter generic.RESTOptionsGe
 
 	shootStateStorage := shootstatestore.NewStorage(restOptionsGetter)
 	storage["shootstates"] = shootStateStorage.ShootState
+
+	// TODO probably remove the cloudprofileStorage and do it like in shootstate
+	shootEventStorage := shooteventstore.NewStorage(restOptionsGetter, cloudprofileStorage.CloudProfile)
+	storage["shootevents"] = shootEventStorage.ShootEvent
 
 	return storage
 }

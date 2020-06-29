@@ -39,3 +39,7 @@ type SecretBindingExpansion interface{}
 type SeedExpansion interface{}
 
 type ShootExpansion interface{}
+
+type ShootEventExpansion interface{}
+
+type ShootStateExpansion interface{}

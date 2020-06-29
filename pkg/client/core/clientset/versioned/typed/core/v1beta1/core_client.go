@@ -37,6 +37,8 @@ type CoreV1beta1Interface interface {
 	SecretBindingsGetter
 	SeedsGetter
 	ShootsGetter
+	ShootEventsGetter
+	ShootStatesGetter
 }
 
 // CoreV1beta1Client is used to interact with features provided by the core.gardener.cloud group.
@@ -86,6 +88,14 @@ func (c *CoreV1beta1Client) Seeds() SeedInterface {
 
 func (c *CoreV1beta1Client) Shoots(namespace string) ShootInterface {
 	return newShoots(c, namespace)
+}
+
+func (c *CoreV1beta1Client) ShootEvents(namespace string) ShootEventInterface {
+	return newShootEvents(c, namespace)
+}
+
+func (c *CoreV1beta1Client) ShootStates(namespace string) ShootStateInterface {
+	return newShootStates(c, namespace)
 }
 
 // NewForConfig creates a new CoreV1beta1Client for the given config.
