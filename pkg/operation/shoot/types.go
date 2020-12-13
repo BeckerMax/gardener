@@ -25,6 +25,7 @@ import (
 	"github.com/gardener/gardener/pkg/operation/botanist/controlplane/etcd"
 	"github.com/gardener/gardener/pkg/operation/botanist/controlplane/kubecontrollermanager"
 	"github.com/gardener/gardener/pkg/operation/botanist/controlplane/kubescheduler"
+	"github.com/gardener/gardener/pkg/operation/botanist/controlplane/resourcemanager"
 	extensionsbackupentry "github.com/gardener/gardener/pkg/operation/botanist/extensions/backupentry"
 	"github.com/gardener/gardener/pkg/operation/botanist/extensions/extension"
 	"github.com/gardener/gardener/pkg/operation/botanist/systemcomponents/metricsserver"
@@ -105,6 +106,7 @@ type ControlPlane struct {
 	KubeScheduler         kubescheduler.KubeScheduler
 	KubeControllerManager kubecontrollermanager.KubeControllerManager
 	ClusterAutoscaler     clusterautoscaler.ClusterAutoscaler
+	ResourceManager       *resourcemanager.ResourceManager
 }
 
 // Extensions contains references to extension resources.
