@@ -851,7 +851,10 @@ func bootstrapComponents(c kubernetes.Interface, namespace string, imageVector i
 
 		SyncPeriod: utils.DurationPtr(time.Hour),
 	}
-	rm := resourcemanager.New(c.Client(), namespace, image.String(), 1, cfg)
+	rm, err := resourcemanager.New(c.Client(), namespace, image.String(), 1, cfg)
+	if err != nil {
+		return nil, err
+	}
 	components = append(components, rm)
 
 	// cluster-autoscaler

@@ -95,14 +95,17 @@ func New(
 	image string,
 	replicas int32,
 	values Values,
-) ResourceManager {
+) (ResourceManager, error) {
+	if err := validateValues(values); err != nil {
+		return nil, err
+	}
 	return &resourceManager{
 		client:    client,
 		image:     image,
 		namespace: namespace,
 		replicas:  replicas,
 		values:    values,
-	}
+	}, nil
 }
 
 type resourceManager struct {
@@ -141,6 +144,16 @@ type Values struct {
 	// WatchedNamespace restricts the gardener-resource-manager to only watch ManagedResources in the defined namespace.
 	// If not set the gardener-resource-manager controller watches for ManagedResources in all namespaces
 	WatchedNamespace *string
+}
+
+func validateValues(v Values) error {
+	if v.Kubeconfig != nil && v.WatchedNamespace == nil {
+		return errors.New("unsupported configuration: If `kubeconfig` is set then `watchedNamespace` also needs to be set")
+	}
+	if v.Kubeconfig == nil && v.WatchedNamespace != nil {
+		return errors.New("unsupported configuration: If `kubeconfig` is nil then a `watchedNamespace` also needs to nil")
+	}
+	return nil
 }
 
 func (r *resourceManager) Deploy(ctx context.Context) error {
@@ -191,20 +204,11 @@ func (r *resourceManager) Destroy(ctx context.Context) error {
 func (r *resourceManager) ensureRBAC(ctx context.Context) error {
 	targetDiffersFromSourceCluster := r.values.Kubeconfig != nil
 	if targetDiffersFromSourceCluster {
-		if r.values.WatchedNamespace == nil {
-			if err := r.ensureClusterRole(ctx, allowManagedResources); err != nil {
-				return err
-			}
-			if err := r.ensureClusterRoleBinding(ctx); err != nil {
-				return err
-			}
-		} else {
-			if err := r.ensureRoleInWatchedNamespace(ctx, allowManagedResources); err != nil {
-				return err
-			}
-			if err := r.ensureRoleBinding(ctx); err != nil {
-				return err
-			}
+		if err := r.ensureRoleInWatchedNamespace(ctx, allowManagedResources); err != nil {
+			return err
+		}
+		if err := r.ensureRoleBinding(ctx); err != nil {
+			return err
 		}
 	} else {
 		if err := r.ensureClusterRole(ctx, allowAll); err != nil {

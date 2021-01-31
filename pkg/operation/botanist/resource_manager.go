@@ -61,7 +61,7 @@ func (b *Botanist) DefaultResourceManager() (resourcemanager.ResourceManager, er
 		image.String(),
 		b.Shoot.GetReplicas(1),
 		cfg,
-	), nil
+	)
 }
 
 // DeployGardenerResourceManager deploys the gardener-resource-manager
