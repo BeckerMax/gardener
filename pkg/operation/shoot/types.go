@@ -106,7 +106,7 @@ type ControlPlane struct {
 	KubeScheduler         kubescheduler.KubeScheduler
 	KubeControllerManager kubecontrollermanager.KubeControllerManager
 	ClusterAutoscaler     clusterautoscaler.ClusterAutoscaler
-	ResourceManager       *resourcemanager.ResourceManager
+	ResourceManager       resourcemanager.ResourceManager
 }
 
 // Extensions contains references to extension resources.
