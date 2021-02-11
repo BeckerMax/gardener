@@ -19,6 +19,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gardener/gardener/pkg/operation/botanist"
+	"github.com/sirupsen/logrus"
+	"image"
+	"k8s.io/utils/pointer"
 	"path/filepath"
 	"strings"
 	"time"
@@ -30,7 +34,6 @@ import (
 	"github.com/gardener/gardener/pkg/features"
 	"github.com/gardener/gardener/pkg/gardenlet/apis/config"
 	gardenletfeatures "github.com/gardener/gardener/pkg/gardenlet/features"
-	"github.com/gardener/gardener/pkg/logger"
 	"github.com/gardener/gardener/pkg/operation/botanist/component"
 	"github.com/gardener/gardener/pkg/operation/botanist/controlplane"
 	"github.com/gardener/gardener/pkg/operation/botanist/controlplane/clusterautoscaler"
@@ -70,7 +73,6 @@ import (
 	autoscalingv1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 	"k8s.io/client-go/util/retry"
 	"k8s.io/component-base/version"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -238,7 +240,14 @@ func deployCertificates(ctx context.Context, seed *Seed, k8sSeedClient kubernete
 }
 
 // BootstrapCluster bootstraps a Seed cluster and deploys various required manifests.
-func BootstrapCluster(ctx context.Context, k8sGardenClient, k8sSeedClient kubernetes.Interface, seed *Seed, secrets map[string]*corev1.Secret, imageVector imagevector.ImageVector, componentImageVectors imagevector.ComponentImageVectors, conf *config.GardenletConfiguration) error {
+func BootstrapCluster(ctx context.Context,
+	k8sGardenClient, k8sSeedClient kubernetes.Interface,
+	seed *Seed, secrets map[string]*corev1.Secret,
+	imageVector imagevector.ImageVector,
+	componentImageVectors imagevector.ComponentImageVectors,
+	conf *config.GardenletConfiguration,
+	seedLogger *logrus.Entry,
+) error {
 	vpaGK := schema.GroupKind{Group: "autoscaling.k8s.io", Kind: "VerticalPodAutoscaler"}
 
 	vpaEnabled := seed.Info.Spec.Settings == nil || seed.Info.Spec.Settings.VerticalPodAutoscaler == nil || seed.Info.Spec.Settings.VerticalPodAutoscaler.Enabled
@@ -796,7 +805,7 @@ func BootstrapCluster(ctx context.Context, k8sGardenClient, k8sSeedClient kubern
 	}
 
 	// managed nginx-ingress handling
-	if err := handleIngressDNSEntry(ctx, k8sSeedClient, chartApplier, seed); err != nil {
+	if err := handleIngressDNSEntry(ctx, k8sSeedClient, chartApplier, seed, seedLogger); err != nil {
 		return err
 	}
 
@@ -830,12 +839,115 @@ func BootstrapCluster(ctx context.Context, k8sGardenClient, k8sSeedClient kubern
 	return flow.Parallel(bootstrapFunctions...)(ctx)
 }
 
+func RunCreateSeedFlow(c kubernetes.Interface, imageVector imagevector.ImageVector, imageVectorOverwrites map[string]string) error {
+	var (
+		g         = flow.NewGraph("Seed cluster creation")
+		namespace = v1beta1constants.GardenNamespace
+	)
+
+	image, err := imageVector.FindImage(common.GardenerResourceManagerImageName, imagevector.RuntimeVersion(c.Version()), imagevector.TargetVersion(c.Version()))
+	if err != nil {
+		return err
+	}
+	cfg := resourcemanager.Values{
+		ConcurrentSyncs:  pointer.Int32Ptr(20),
+		HealthSyncPeriod: utils.DurationPtr(time.Minute),
+		ResourceClass:    pointer.StringPtr(v1beta1constants.SeedResourceManagerClass),
+
+		SyncPeriod: utils.DurationPtr(time.Hour),
+	}
+	rm := resourcemanager.New(c.Client(), namespace, image.String(), 1, cfg)
+	deployResourceManager := g.Add(flow.Task{
+		Name: "Deploying gardener-resource-manager",
+		Fn:   flow.TaskFn(rm.Deploy),
+	})
+
+	g.Add(flow.Task{
+		Name:         "Deploying cluster-autoscaler",
+		Fn:           clusterautoscaler.NewBootstrapper(c.Client(), namespace).Deploy,
+		Dependencies: flow.NewTaskIDs(deployResourceManager),
+	})
+
+}
+
+// Deletes certain resources from the seed cluster.
+//func RunDeleteSeedFlow(c kubernetes.Interface, seedLogger *logrus.Entry) *gardencorev1beta1helper.WrappedLastErrors {
+func RunDeleteSeedFlow(c kubernetes.Interface, seedLogger *logrus.Entry) error {
+	var (
+		//errorContext = utilerrors.NewErrorContext("Seed cluster deletion", []string{})
+		namespace = v1beta1constants.GardenNamespace
+		g         = flow.NewGraph("Seed cluster deletion")
+	)
+
+	autoscaler := clusterautoscaler.NewBootstrapper(c.Client(), namespace)
+	destroyClusterAutoscaler := g.Add(flow.Task{
+		Name: "Destroying cluster-autoscaler",
+		Fn:   flow.TaskFn(autoscaler.Destroy),
+	})
+
+	kubernetesVersion, err := semver.NewVersion(c.Version())
+	if err != nil {
+		//return gardencorev1beta1helper.NewWrappedLastErrors(gardencorev1beta1helper.FormatLastErrDescription(err), flow.Errors(err))
+		return err
+	}
+	etcdDruid := etcd.NewBootstrapper(c.Client(), namespace, "", kubernetesVersion, nil)
+	destroyEtcdDruid := g.Add(flow.Task{
+		Name: "Destroying etcd druid",
+		Fn:   flow.TaskFn(etcdDruid.Destroy),
+	})
+
+	seedAdmission := seedadmission.New(c.Client(), namespace, "", kubernetesVersion)
+	destroySeedAdmissionController := g.Add(flow.Task{
+		Name: "Destroying gardener-seed-admission-controller",
+		Fn:   seedAdmission.Destroy,
+	})
+
+	kubeScheduler, err := scheduler.Bootstrap(c.DirectClient(), namespace, nil, kubernetesVersion)
+	if err != nil {
+		return err
+		//return gardencorev1beta1helper.NewWrappedLastErrors(gardencorev1beta1helper.FormatLastErrDescription(err), flow.Errors(err))
+	}
+	destroyKubeScheduler := g.Add(flow.Task{
+		Name: "Destroying kubescheduler",
+		Fn:   kubeScheduler.Destroy,
+	})
+
+	rm := resourcemanager.New(c.Client(), namespace, "", 0, resourcemanager.Values{})
+	g.Add(flow.Task{
+		Name: "Destroying gardener-resource-manager",
+		Fn:   rm.Destroy,
+		Dependencies: flow.NewTaskIDs(
+			destroyClusterAutoscaler,
+			destroyEtcdDruid,
+			destroySeedAdmissionController,
+			destroyKubeScheduler,
+		),
+	})
+	f := g.Compile()
+
+	//TODO do I need those opts?
+	if err := f.Run(flow.Opts{
+		Logger: seedLogger,
+		//ProgressReporter: c.newProgressReporter(o.ReportShootProgress),
+		//ErrorCleaner:     o.CleanShootTaskErrorAndUpdateStatusLabel,
+		//ErrorContext: errorContext,
+	}); err != nil {
+		//return gardencorev1beta1helper.NewWrappedLastErrors(gardencorev1beta1helper.FormatLastErrDescription(err), flow.Errors(err))
+		return err
+	}
+
+	return nil
+}
+
 // DebootstrapCluster deletes certain resources from the seed cluster.
 func DebootstrapCluster(ctx context.Context, k8sSeedClient kubernetes.Interface) error {
+
 	bootstrapComponents, err := bootstrapComponents(k8sSeedClient, v1beta1constants.GardenNamespace, nil, nil)
 	if err != nil {
 		return err
 	}
+
+	// REMOVE grm from components
 
 	// Delete component specific resources
 	var debootstrapFunctions []flow.TaskFn
@@ -1128,10 +1240,9 @@ func handleDNSProvider(ctx context.Context, gardenClient, seedClient client.Clie
 	return err
 }
 
-func handleIngressDNSEntry(ctx context.Context, c kubernetes.Interface, chartApplier kubernetes.ChartApplier, seed *Seed) error {
+func handleIngressDNSEntry(ctx context.Context, c kubernetes.Interface, chartApplier kubernetes.ChartApplier, seed *Seed, seedLogger *logrus.Entry) error {
 	var (
-		seedLogger = logger.Logger.WithField("seed", seed.Info.Name)
-		values     = &dns.EntryValues{Name: "ingress"}
+		values = &dns.EntryValues{Name: "ingress"}
 	)
 
 	if managedIngress(seed) {
