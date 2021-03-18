@@ -448,6 +448,12 @@ var _ = Describe("ControllerRegistrationSeedControl", func() {
 				Deployment: &gardencorev1beta1.ControllerDeployment{
 					Policy: &onDemandPolicy,
 				},
+				Resources: []gardencorev1beta1.ControllerResource{
+					{
+						Kind: extensionsv1alpha1.ExtensionResource,
+						Type: type7,
+					},
+				},
 			},
 		}
 		controllerRegistration8 = &gardencorev1beta1.ControllerRegistration{
@@ -784,16 +790,35 @@ var _ = Describe("ControllerRegistrationSeedControl", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("should not consider 'always-deploy' registrations when seed has no shoots and deletion timestamp", func() {
-			seedObjectMetaCopy := seedObjectMeta.DeepCopy()
-			time := metav1.Time{}
-			seedObjectMetaCopy.DeletionTimestamp = &time
-			wantedKindTypeCombinations := sets.NewString()
+		Context("Deletion timestamp set", func() {
 
-			names, err := computeWantedControllerRegistrationNames(wantedKindTypeCombinations, controllerInstallationList, controllerRegistrations, 0, *seedObjectMetaCopy)
+			It("should add registrations only if there exists an installation which has the status required `true`", func() {
+				seedObjectMetaCopy := seedObjectMeta.DeepCopy()
+				time := metav1.Time{}
+				seedObjectMetaCopy.DeletionTimestamp = &time
 
-			Expect(names).To(Equal(sets.NewString(controllerRegistration7.Name)))
-			Expect(err).NotTo(HaveOccurred())
+				wantedKindTypeCombinations := sets.NewString(
+					extensionsv1alpha1.BackupBucketResource + "/" + type1,
+				)
+
+				names, err := computeWantedControllerRegistrationNames(wantedKindTypeCombinations, controllerInstallationList, controllerRegistrations, 0, *seedObjectMetaCopy)
+
+				Expect(err).ToNot(HaveOccurred())
+				Expect(names).To(Equal(sets.NewString(controllerRegistration7.Name)))
+			})
+
+			It("should not consider 'always-deploy' registrations when seed has no shoots", func() {
+				seedObjectMetaCopy := seedObjectMeta.DeepCopy()
+				time := metav1.Time{}
+				seedObjectMetaCopy.DeletionTimestamp = &time
+
+				wantedKindTypeCombinations := sets.NewString()
+				names, err := computeWantedControllerRegistrationNames(wantedKindTypeCombinations, controllerInstallationList, controllerRegistrations, 0, *seedObjectMetaCopy)
+
+				Expect(names).To(Equal(sets.NewString(controllerRegistration7.Name)))
+				Expect(err).NotTo(HaveOccurred())
+			})
+
 		})
 
 		It("should fail to compute the result and return error", func() {

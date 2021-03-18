@@ -319,7 +319,7 @@ func computeControllerRegistrationMaps(
 // computeWantedControllerRegistrationNames computes the list of names of ControllerRegistration objects that are desired
 // to be installed. The computation is performed based on a list of required kind/type combinations and the proper mapping
 // to existing ControllerRegistration objects. Additionally, all names in the alwaysPolicyControllerRegistrationNames list
-// will be returned.
+// will be returned and all currently installed and required installations.
 func computeWantedControllerRegistrationNames(
 	wantedKindTypeCombinations sets.String,
 	controllerInstallationList *gardencorev1beta1.ControllerInstallationList,
@@ -347,27 +347,35 @@ func computeWantedControllerRegistrationNames(
 		}
 	}
 
-	for _, requiredExtension := range wantedKindTypeCombinations.UnsortedList() {
-		names, ok := kindTypeToControllerRegistrationNames[requiredExtension]
-		if !ok {
-			return nil, fmt.Errorf("need to install an extension controller for %q but no appropriate ControllerRegistration found", requiredExtension)
-		}
+	wantedControllerRegistrationNames.Insert(installedAndRequiredRegistrationNames(controllerInstallationList, seedObjectMeta.Name).List()...)
 
-		wantedControllerRegistrationNames.Insert(names...)
+	// In case of deletion only add already installed and required installations
+	if seedObjectMeta.DeletionTimestamp == nil {
+		for _, wantedExtension := range wantedKindTypeCombinations.UnsortedList() {
+			names, ok := kindTypeToControllerRegistrationNames[wantedExtension]
+			if !ok {
+				return nil, fmt.Errorf("need to install an extension controller for %q but no appropriate ControllerRegistration found", wantedExtension)
+			}
+			wantedControllerRegistrationNames.Insert(names...)
+		}
 	}
 
+	// filter controller registrations with non-matching seed selector
+	return controllerRegistrationNamesWithMatchingSeedLabelSelector(wantedControllerRegistrationNames.UnsortedList(), controllerRegistrations, seedObjectMeta.Labels)
+}
+
+func installedAndRequiredRegistrationNames(controllerInstallationList *gardencorev1beta1.ControllerInstallationList, seedName string) sets.String {
+	requiredControllerRegistrationNames := sets.NewString()
 	for _, controllerInstallation := range controllerInstallationList.Items {
-		if controllerInstallation.Spec.SeedRef.Name != seedObjectMeta.Name {
+		if controllerInstallation.Spec.SeedRef.Name != seedName {
 			continue
 		}
 		if !gardencorev1beta1helper.IsControllerInstallationRequired(controllerInstallation) {
 			continue
 		}
-		wantedControllerRegistrationNames.Insert(controllerInstallation.Spec.RegistrationRef.Name)
+		requiredControllerRegistrationNames.Insert(controllerInstallation.Spec.RegistrationRef.Name)
 	}
-
-	// filter controller registrations with non-matching seed selector
-	return controllerRegistrationNamesWithMatchingSeedLabelSelector(wantedControllerRegistrationNames.UnsortedList(), controllerRegistrations, seedObjectMeta.Labels)
+	return requiredControllerRegistrationNames
 }
 
 // computeRegistrationNameToInstallationNameMap computes a map that maps the name of a ControllerRegistration to the name of an
