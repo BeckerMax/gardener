@@ -2381,6 +2381,20 @@ FileContentInline
 <p>Inline is a struct that contains information about the inlined data.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>transmitUnencoded</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>TransmitUnencoded set to true will ensure that the os-extension does not encode the file content when sent to the node.
+The default behaviour is that all content is encoded.
+This for example can be used to manipulate the clear-text content before it reaches the node.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="extensions.gardener.cloud/v1alpha1.FileContentInline">FileContentInline

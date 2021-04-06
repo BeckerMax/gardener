@@ -93,6 +93,8 @@ const (
 	// PathCredentialsClientKey is a constant for a path containing the 'client private key' credentials part for the
 	// download.
 	PathCredentialsClientKey = PathCredentialsDirectory + "/client.key"
+	// PathBootstrapToken Path to machine bootstraptoken
+	PathBootstrapToken = PathCredentialsDirectory + "/bootstrap-token"
 	// PathDownloadedCloudConfig is the path on the shoot worker nodes at which the downloaded cloud-config user-data
 	// will be stored.
 	PathDownloadedCloudConfig = PathDownloadsDirectory + "/cloud_config"
@@ -110,12 +112,14 @@ const (
 // ### !CAUTION! ###
 func Config(cloudConfigUserDataSecretName, apiServerURL string) ([]extensionsv1alpha1.Unit, []extensionsv1alpha1.File, error) {
 	var ccdScript bytes.Buffer
+	// TODO is variable needed here?
 	if err := tpl.Execute(&ccdScript, map[string]string{
 		"secretName":                cloudConfigUserDataSecretName,
 		"pathCredentialsServer":     PathCredentialsServer,
 		"pathCredentialsCACert":     PathCredentialsCACert,
 		"pathCredentialsClientCert": PathCredentialsClientCert,
 		"pathCredentialsClientKey":  PathCredentialsClientKey,
+		"pathBootstrapToken":        PathBootstrapToken,
 		"pathDownloadedChecksum":    PathDownloadedCloudConfigChecksum,
 		"annotationChecksum":        AnnotationKeyChecksum,
 		"dataKeyScript":             DataKeyScript,
@@ -162,6 +166,17 @@ WantedBy=multi-user.target`),
 					Name:    SecretName,
 					DataKey: secrets.DataKeyCertificateCA,
 				},
+			},
+		},
+		{
+			Path:        PathBootstrapToken, //TODO possibly place in /var/lib/kubelet/kubeconfig-bootstrap ?
+			Permissions: pointer.Int32Ptr(0644),
+			Content: extensionsv1alpha1.FileContent{
+				Inline: &extensionsv1alpha1.FileContentInline{
+					Encoding: "b64",
+					Data:     utils.EncodeBase64([]byte("<<BOOTSTRAP_TOKEN>>")),
+				},
+				TransmitUnencoded: pointer.BoolPtr(true),
 			},
 		},
 		{
