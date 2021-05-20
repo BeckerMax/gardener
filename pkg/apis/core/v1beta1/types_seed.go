@@ -167,7 +167,8 @@ type Ingress struct {
 	// to construct ingress URLs for system applications running in Shoot clusters. Once set this field is immutable.
 	Domain string `json:"domain" protobuf:"bytes,1,opt,name=domain"`
 	// Controller configures a Gardener managed Ingress Controller listening on the ingressDomain
-	Controller IngressController `json:"controller" protobuf:"bytes,2,opt,name=controller"`
+	// +optional
+	Controller *IngressController `json:"controller,omitempty" protobuf:"bytes,2,opt,name=controller"`
 }
 
 // IngressController enables a Gardener managed Ingress Controller listening on the ingressDomain

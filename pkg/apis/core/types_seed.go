@@ -147,7 +147,7 @@ type Ingress struct {
 	// to construct ingress URLs for system applications running in Shoot clusters. Once set this field is immutable.
 	Domain string
 	// Controller configures a Gardener managed Ingress Controller listening on the ingressDomain
-	Controller IngressController
+	Controller *IngressController
 }
 
 // IngressController enables a Gardener managed Ingress Controller listening on the ingressDomain
