@@ -140,10 +140,14 @@ func (r *shootMaintenanceReconciler) reconcile(ctx context.Context, shoot *garde
 		return err
 	}
 
-	updatedMachineImages, reasonForImageUpdatePerPool, err := MaintainMachineImages(shootLogger, shoot, cloudProfile)
+	reasonForImageUpdatePerPool, err := MaintainMachineImages(shootLogger, shoot, cloudProfile)
 	if err != nil {
 		// continue execution to allow the kubernetes version update
 		shootLogger.Error(fmt.Sprintf("Could not maintain machine image version: %s", err.Error()))
+	}
+	for _, reason := range reasonForImageUpdatePerPool {
+		r.recorder.Eventf(shoot, corev1.EventTypeNormal, gardencorev1beta1.ShootEventImageVersionMaintenance, "%s",
+			fmt.Sprintf("Updated %s.", reason))
 	}
 
 	updatedKubernetesVersion, reasonForKubernetesUpdate, err := MaintainKubernetesVersion(shoot, cloudProfile, shootLogger)
@@ -178,9 +182,6 @@ func (r *shootMaintenanceReconciler) reconcile(ctx context.Context, shoot *garde
 		controllerutils.AddTasks(shoot.Annotations, v1beta1constants.ShootTaskRestartCoreAddons)
 	}
 
-	if updatedMachineImages != nil {
-		gardencorev1beta1helper.UpdateMachineImages(shoot.Spec.Provider.Workers, updatedMachineImages)
-	}
 	if updatedKubernetesVersion != nil {
 		shoot.Spec.Kubernetes.Version = *updatedKubernetesVersion
 	}
@@ -201,15 +202,19 @@ func (r *shootMaintenanceReconciler) reconcile(ctx context.Context, shoot *garde
 			fmt.Sprintf("Updated %s.", *reasonForKubernetesUpdate))
 	}
 
-	if updatedMachineImages != nil {
-		for _, reason := range reasonForImageUpdatePerPool {
-			r.recorder.Eventf(shoot, corev1.EventTypeNormal, gardencorev1beta1.ShootEventImageVersionMaintenance, "%s",
-				fmt.Sprintf("Updated %s.", reason))
-		}
-	}
-
 	shootLogger.Infof("[SHOOT MAINTENANCE] completed")
 	return nil
+}
+
+// MaintainMachineImages updates the machine images of a Shoot's worker pools if necessary
+func MaintainMachineImages(shootLogger *logrus.Entry, shoot *gardencorev1beta1.Shoot, cloudProfile *gardencorev1beta1.CloudProfile) ([]string, error) {
+	updatedMachineImages, reasonForImageUpdatePerPool, err := selectUpdatedMachineImages(shootLogger, shoot, cloudProfile)
+
+	if updatedMachineImages != nil {
+		gardencorev1beta1helper.UpdateMachineImages(shoot.Spec.Provider.Workers, updatedMachineImages)
+	}
+
+	return reasonForImageUpdatePerPool, err
 }
 
 // MaintainKubernetesVersion determines if a shoots kubernetes version has to be maintained and in case returns the target version
@@ -283,8 +288,7 @@ func hasMaintainNowAnnotation(shoot *gardencorev1beta1.Shoot) bool {
 	return ok && operation == v1beta1constants.ShootOperationMaintain
 }
 
-// MaintainMachineImages determines if a shoots machine images have to be maintained and in case returns the target images
-func MaintainMachineImages(logger *logrus.Entry, shoot *gardencorev1beta1.Shoot, cloudProfile *gardencorev1beta1.CloudProfile) (updatedMachineImages []*gardencorev1beta1.ShootMachineImage, reasons []string, error error) {
+func selectUpdatedMachineImages(logger *logrus.Entry, shoot *gardencorev1beta1.Shoot, cloudProfile *gardencorev1beta1.CloudProfile) (updatedMachineImages []*gardencorev1beta1.ShootMachineImage, reasons []string, error error) {
 	var (
 		shootMachineImagesForUpdate []*gardencorev1beta1.ShootMachineImage
 		reasonsForUpdate            []string
