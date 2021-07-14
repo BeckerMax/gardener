@@ -1,0 +1,6 @@
+TODO:
+
+- test case for CRI.containerruntimes
+- additional testcases:
+  - We want: cri.nil should be allowed on an image with any cri configuration (we require that when we remove docker support all shoots select a CRI explicitly (through defaulting or manual).
+  - Images supporting multiple containerruntimes
